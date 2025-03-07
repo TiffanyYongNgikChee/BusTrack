@@ -14,21 +14,22 @@ const Register = () => {
   };
 
   // Send image to backend
-  const uploadImage = async () => {
-    if (!image) {
-      setMessage("Please take a picture first!");
-      return;
-    }
-
+  const uploadImage = async (imageData) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/register-face", {
-        image: image,
-      });
-
-      setMessage(response.data.message);
+      const response = await axios.post(
+        "http://localhost:5001/get-face-encoding",
+        { image: imageData },  // Make sure the data is in JSON format
+        {
+          headers: {
+            "Content-Type": "application/json", // ✅ Required to avoid 415 error
+          },
+        }
+      );
+  
+      console.log("Face encoding received:", response.data);
+      return response.data.encoding;
     } catch (error) {
       console.error("Error uploading image:", error);
-      setMessage("Error registering face. Try again!");
     }
   };
 
@@ -41,7 +42,9 @@ const Register = () => {
       {image && <img src={image} alt="Captured" className="mt-4 border rounded" />}
 
       <button onClick={capture} className="mt-2 bg-blue-500 text-white p-2 rounded">Take Picture</button>
-      <button onClick={uploadImage} className="mt-2 bg-green-500 text-white p-2 rounded">Register Face</button>
+      <button onClick={() => uploadImage(image)} className="mt-2 bg-green-500 text-white p-2 rounded">
+        Register Face
+      </button>
 
       {message && <p className="mt-4 text-lg font-semibold">{message}</p>}
     </div>
